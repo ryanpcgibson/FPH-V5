@@ -259,12 +259,16 @@ const PetForm: React.FC<PetFormProps> = ({
                     >
                       Delete
                     </Button>
-                    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <AlertDialog
+                      open={showDeleteDialog}
+                      onOpenChange={setShowDeleteDialog}
+                    >
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Pet</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete this pet? This action cannot be undone.
+                            Are you sure you want to delete this pet? This
+                            action cannot be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
