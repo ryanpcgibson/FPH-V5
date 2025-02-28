@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,6 +26,16 @@ import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import DatePickerWithInput from "../DatePickerWithInput";
 import { useDebouncedCallback } from "use-debounce";
 import { VALIDATION_MESSAGES } from "@/constants/validationMessages";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.PET.NAME_MIN_LENGTH),
@@ -100,6 +110,8 @@ const PetForm: React.FC<PetFormProps> = ({
   const hasErrors = Object.keys(formState.errors).length > 0;
   const isSaveDisabled = !isDirty || hasErrors;
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const handleFieldChange = (
     field: keyof z.infer<typeof formSchema>,
     value: any
@@ -146,7 +158,7 @@ const PetForm: React.FC<PetFormProps> = ({
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 gap-4">
+                  <FormItem className="grid grid-cols-4 gap-4 items-center">
                     <FormLabel className="col-span-1">Pet Name</FormLabel>
                     <div className="col-span-3 space-y-2">
                       <FormControl>
@@ -169,7 +181,7 @@ const PetForm: React.FC<PetFormProps> = ({
                 control={form.control}
                 name="start_date"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 gap-4">
+                  <FormItem className="grid grid-cols-4 gap-4 items-center">
                     <FormLabel className="col-span-1">Start Date</FormLabel>
                     <div className="col-span-3 space-y-2">
                       <FormControl>
@@ -191,7 +203,7 @@ const PetForm: React.FC<PetFormProps> = ({
                 control={form.control}
                 name="end_date"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 gap-4">
+                  <FormItem className="grid grid-cols-4 gap-4 items-center">
                     <FormLabel className="col-span-1">End Date</FormLabel>
                     <div className="col-span-3 space-y-2">
                       <FormControl>
@@ -213,20 +225,23 @@ const PetForm: React.FC<PetFormProps> = ({
                 control={form.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem className="flex items-center">
-                    <FormLabel className="w-1/4">Description</FormLabel>
-                    <FormControl className="flex-1">
-                      <Input
-                        data-testid="pet-description-input"
-                        placeholder="Pet description (optional)"
-                        {...field}
-                        className="w-full bg-background"
-                        value={field.value || ""}
-                        onChange={(e) =>
-                          handleFieldChange("description", e.target.value)
-                        }
-                      />
-                    </FormControl>
+                  <FormItem className="grid grid-cols-4 gap-4 items-center">
+                    <FormLabel className="col-span-1">Description</FormLabel>
+                    <div className="col-span-3 space-y-2">
+                      <FormControl>
+                        <Input
+                          data-testid="pet-description-input"
+                          placeholder="Pet description (optional)"
+                          {...field}
+                          className="w-full bg-background"
+                          value={field.value || ""}
+                          onChange={(e) =>
+                            handleFieldChange("description", e.target.value)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </div>
                   </FormItem>
                 )}
               />
@@ -235,14 +250,38 @@ const PetForm: React.FC<PetFormProps> = ({
             <CardFooter className="flex justify-between">
               <div>
                 {onDelete && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={onDelete}
-                    data-testid="delete-button"
-                  >
-                    Delete
-                  </Button>
+                  <>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => setShowDeleteDialog(true)}
+                      data-testid="delete-button"
+                    >
+                      Delete
+                    </Button>
+                    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Pet</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete this pet? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              onDelete();
+                              setShowDeleteDialog(false);
+                            }}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </>
                 )}
               </div>
               <div className="flex gap-2">
