@@ -1,30 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import DatePicker from "../DatePicker";
-import { Moment } from "@/db/db_types";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import EntityConnectionManager from "@/components/EntityConnectionManager";
 import { useMoments } from "@/hooks/useMoments";
 import PhotoUploadModal from "@/components/photo/PhotoUploadModal";
+import { EntityForm } from "../EntityForm";
+import { EntityFormField } from "../EntityFormField";
+import DatePicker from "../DatePicker";
+import { useEntityFormState } from "@/hooks/useEntityFormState";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -33,15 +19,17 @@ const formSchema = z.object({
   end_date: z.date().nullable(),
   pet_connection: z.string().optional(),
   location_connection: z.string().optional(),
+  family_id: z.number(),
 });
+
+export type MomentFormValues = z.infer<typeof formSchema>;
 
 interface MomentFormProps {
   momentId?: number;
   familyId: number;
-  initialData?: Moment;
-  onFamilyChange: (familyId: number) => void;
+  initialData?: MomentFormValues;
   onDelete?: () => void;
-  onSubmit: (values: z.infer<typeof formSchema>) => void;
+  onSubmit: (values: MomentFormValues) => void;
   onCancel: () => void;
 }
 
@@ -53,226 +41,106 @@ const MomentForm: React.FC<MomentFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  console.log("MomentForm", {
-    momentId,
-    familyId,
-    initialData,
-  });
-  const { familyData } = useFamilyDataContext();
-  const { connectMoment, disconnectMoment } = useMoments();
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
+  const { form, isSaveDisabled, handleFieldChange } = useEntityFormState(
+    formSchema,
+    {
       title: initialData?.title ?? "",
       body: initialData?.body ?? "",
       start_date: initialData?.start_date ?? null,
       end_date: initialData?.end_date ?? null,
-    },
-  });
-
-  useEffect(() => {
-    if (momentId === null) {
-      form.setValue("title", "");
-      form.setValue("body", "");
-      form.setValue("start_date", null);
-      form.setValue("end_date", null);
-    } else {
-      form.setValue("title", initialData?.title || "");
-      form.setValue("body", initialData?.body || "");
-      form.setValue("start_date", initialData?.start_date || null); // TODO: convert to string?
-      form.setValue("end_date", initialData?.end_date || null); // TODO: convert to string?
+      family_id: familyId,
     }
-  }, [momentId, familyId, initialData, form]);
+  );
 
-  const handleConnectPet = async (petId: number) => {
-    if (momentId) {
-      await connectMoment(momentId, petId, "pet");
-    }
-  };
-
-  const handleDisconnectPet = async (petId: number) => {
-    if (momentId) {
-      await disconnectMoment(momentId, petId, "pet");
-    }
-  };
-
-  const handleConnectLocation = async (locationId: number) => {
-    if (momentId) {
-      await connectMoment(momentId, locationId, "location");
-    }
-  };
-
-  const handleDisconnectLocation = async (locationId: number) => {
-    if (momentId) {
-      await disconnectMoment(momentId, locationId, "location");
-    }
+  const ConnectionSection = () => {
+    return (
+      <>
+        <EntityConnectionManager
+          entityType="pet"
+          connectedEntities={initialData?.pets || []}
+          availableEntities={
+            familyData?.pets.filter(
+              (p) => !initialData?.pets?.some((mp) => mp.id === p.id)
+            ) || []
+          }
+          onConnect={(petId) => connectMoment(momentId!, petId, "pet")}
+          onDisconnect={(petId) => disconnectMoment(momentId!, petId, "pet")}
+        />
+        <EntityConnectionManager
+          control={form.control}
+          name="location_connection"
+          label="Locations"
+          entityType="location"
+          connectedEntities={initialData?.locations || []}
+          availableEntities={
+            familyData?.locations.filter(
+              (l) => !initialData?.locations?.some((ml) => ml.id === l.id)
+            ) || []
+          }
+          onConnect={(locationId) =>
+            connectMoment(momentId!, locationId, "location")
+          }
+          onDisconnect={(locationId) =>
+            disconnectMoment(momentId!, locationId, "location")
+          }
+        />
+        <EntityConnectionManager
+          control={form.control}
+          name="photo_connection"
+          label="Photos"
+          entityType="photo"
+          onAdd={() => setIsUploadModalOpen(true)}
+          connectedEntities={initialData?.photos || []}
+          availableEntities={[]}
+          onConnect={() => {}}
+          onDisconnect={() => {}}
+        />
+      </>
+    );
   };
 
   return (
-    <div className="flex justify-center">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full max-w-lg"
-        >
-          <Card>
-            <CardContent className="space-y-2 pt-2">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-2">
-                    <FormLabel className="w-1/4">Title</FormLabel>
-                    <FormControl className="flex-1">
-                      <Input
-                        placeholder="Title"
-                        {...field}
-                        className="w-full bg-background"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="body"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-2">
-                    <FormLabel className="w-1/4">Description</FormLabel>
-                    <FormControl className="flex-1">
-                      <Input
-                        placeholder="Description (optional)"
-                        {...field}
-                        className="w-full bg-background"
-                        value={field.value || ""}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <FormField
-                  control={form.control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormLabel className="w-1/4">Start Date</FormLabel>
-                      <FormControl className="flex-1">
-                        <DatePicker
-                          date={field.value}
-                          setDate={(date) => field.onChange(date)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="end_date"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormLabel className="w-1/4">End Date</FormLabel>
-                      <FormControl className="flex-1">
-                        <DatePicker
-                          date={field.value}
-                          setDate={(date) => field.onChange(date)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <EntityConnectionManager
-                control={form.control}
-                name="pet_connection"
-                label="Pets"
-                entityType="pet"
-                connectedEntities={initialData?.pets || []}
-                availableEntities={
-                  familyData?.pets.filter(
-                    (p) => !initialData?.pets?.some((mp) => mp.id === p.id)
-                  ) || []
-                }
-                onConnect={handleConnectPet}
-                onDisconnect={handleDisconnectPet}
-              />
-
-              <EntityConnectionManager
-                control={form.control}
-                name="location_connection"
-                label="Locations"
-                entityType="location"
-                connectedEntities={initialData?.locations || []}
-                availableEntities={
-                  familyData?.locations.filter(
-                    (l) => !initialData?.locations?.some((ml) => ml.id === l.id)
-                  ) || []
-                }
-                onConnect={handleConnectLocation}
-                onDisconnect={handleDisconnectLocation}
-              />
-              <EntityConnectionManager
-                control={form.control}
-                name="photo_connection"
-                label="Photos"
-                entityType="photo"
-                onAdd={() => setIsUploadModalOpen(true)}
-                connectedEntities={initialData?.photos || []}
-                availableEntities={[]}
-                onConnect={() => {}}
-                onDisconnect={() => {}}
-              />
-            </CardContent>
-
-            <CardFooter className="flex justify-end space-x-2">
-              {momentId && onDelete && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this moment?"
-                      )
-                    ) {
-                      onDelete();
-                    }
-                  }}
-                >
-                  Delete
-                </Button>
-              )}
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button type="submit">{momentId ? "Update" : "Create"}</Button>
-            </CardFooter>
-          </Card>
-        </form>
-      </Form>
-      {momentId && (
-        <PhotoUploadModal
-          isOpen={isUploadModalOpen}
-          onClose={() => setIsUploadModalOpen(false)}
-          familyId={familyId}
-          momentId={momentId}
-          onUploadComplete={(files) => {
-            setIsUploadModalOpen(false);
-            // You might want to refresh the moment data here
-          }}
+    <EntityForm
+      form={form}
+      entityId={momentId}
+      entityType="Moment"
+      onDelete={onDelete}
+      onSubmit={onSubmit}
+      onCancel={onCancel}
+      isSaveDisabled={isSaveDisabled}
+      connectionSection={<ConnectionSection />}
+    >
+      <EntityFormField control={form.control} name="title" label="Title">
+        <Input
+          placeholder="Title"
+          className="w-full bg-background"
+          {...form.register("title")}
         />
-      )}
-    </div>
+      </EntityFormField>
+      <EntityFormField control={form.control} name="body" label="Description">
+        <Input
+          placeholder="Description (optional)"
+          className="w-full bg-background"
+          {...form.register("body")}
+        />
+      </EntityFormField>
+      <EntityFormField
+        control={form.control}
+        name="start_date"
+        label="Start Date"
+      >
+        <DatePicker
+          date={form.watch("start_date")}
+          setDate={(date) => form.setValue("start_date", date)}
+        />
+      </EntityFormField>
+      <EntityFormField control={form.control} name="end_date" label="End Date">
+        <DatePicker
+          date={form.watch("end_date")}
+          setDate={(date) => form.setValue("end_date", date)}
+        />
+      </EntityFormField>
+    </EntityForm>
   );
 };
 

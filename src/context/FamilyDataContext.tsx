@@ -2,12 +2,13 @@ import React, { createContext, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { Families, FamilyData } from "@/db/db_types";
 import { useFamilyData } from "@/hooks/useFamilyData";
+import { useURLContext } from "./URLContext";
 
 interface FamilyDataContextType {
   families: Families | undefined;
   familyData: FamilyData | undefined;
-  selectedFamilyId: number | null;
-  selectedFamilyName: string | null;
+  selectedFamilyId: number | undefined;
+  selectedFamilyName: string | undefined;
   isLoading: boolean;
   error: Error | null;
 }
@@ -19,8 +20,7 @@ const FamilyDataContext = createContext<FamilyDataContextType | undefined>(
 const FamilyDataProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { familyId: familyIdParam } = useParams<{ familyId?: string }>();
-  const selectedFamilyId = familyIdParam ? parseInt(familyIdParam, 10) : null;
+  const { selectedFamilyId } = useURLContext();
   const { families, familyData, isLoading, isError, error } = useFamilyData(
     selectedFamilyId ?? undefined
   );

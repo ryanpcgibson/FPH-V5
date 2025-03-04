@@ -2,13 +2,14 @@ import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import { Link } from "react-router-dom";
 import FPHLogo from "@/assets/FPHLogo.svg?react";
 import { Card } from "./ui/card";
-
+import { useURLContext } from "@/context/URLContext";
 const AppHeader: React.FC = () => {
   let selectedFamilyId = null;
   let selectedFamilyName = null;
 
   try {
-    ({ selectedFamilyId, selectedFamilyName } = useFamilyDataContext());
+    ({ selectedFamilyId } = useURLContext());
+    ({ selectedFamilyName } = useFamilyDataContext());
   } catch {}
 
   return (

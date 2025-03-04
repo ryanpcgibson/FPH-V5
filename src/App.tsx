@@ -20,15 +20,16 @@ import FamilyData from "@/pages/app/family/FamilyDataPage";
 import FamilyFormPage from "@/pages/app/family/FamilyFormPage";
 
 import PetInfo from "@/pages/app/family/pet/PetDetailPage";
-import PetFormPage from "@/pages/app/family/pet/PetFormPage";
+// import PetFormPage from "@/pages/app/family/pet/PetFormPage";
 
 import LocationInfo from "@/pages/app/family/location/LocationDetailPage";
 import LocationFormPage from "@/pages/app/family/location/LocationFormPage";
 
-import MomentFormPage from "@/pages/app/family/moment/MomentFormPage";
+// import MomentFormPage from "@/pages/app/family/moment/MomentFormPage";
 
 // import TestPage from "./pages/app/TestPage";
 import FamilyListPage from "@/pages/app/FamilyListPage";
+import { URLProvider } from "@/context/URLContext";
 
 function App() {
   return (
@@ -43,38 +44,40 @@ function App() {
             <Route
               path="/app"
               element={
-                <FamilyDataProvider>
-                  <PetTimelineProvider>
-                    <LocationTimelineProvider>
-                      <ProtectedRoute />
-                    </LocationTimelineProvider>
-                  </PetTimelineProvider>
-                </FamilyDataProvider>
+                <URLProvider>
+                  <FamilyDataProvider>
+                    <PetTimelineProvider>
+                      <LocationTimelineProvider>
+                        <ProtectedRoute />
+                      </LocationTimelineProvider>
+                    </PetTimelineProvider>
+                  </FamilyDataProvider>
+                </URLProvider>
               }
             >
               <Route element={<AppLayout />}>
                 <Route index element={<FamilyListPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="family/add" element={<FamilyFormPage />} />
-                <Route path="family/:familyId">
+                <Route path="family/:selectedFamilyId">
                   <Route index element={<TimelinePage />} />
-                  <Route path="pet/:petId" element={<PetInfo />} />
-                  <Route path="pet/:petId/edit" element={<PetFormPage />} />
-                  <Route path="pet/add" element={<PetFormPage />} />
+                  <Route path="pet/:selectedPetId" element={<PetInfo />} />
+                  {/* <Route path="pet/:petId/edit" element={<PetFormPage />} /> */}
+                  {/* <Route path="pet/add" element={<PetFormPage />} /> */}
                   <Route
-                    path="location/:locationId"
+                    path="location/:selectedLocationId"
                     element={<LocationInfo />}
                   />
                   <Route
-                    path="location/:locationId/edit"
+                    path="location/:selectedLocationId/edit"
                     element={<LocationFormPage />}
                   />
                   <Route path="location/add" element={<LocationFormPage />} />
                   <Route
-                    path="moment/:momentId/edit"
-                    element={<MomentFormPage />}
+                    path="moment/:selectedMomentId/edit"
+                    // element={<MomentFormPage />}
                   />
-                  <Route path="moment/add" element={<MomentFormPage />} />
+                  {/* <Route path="moment/add" element={<MomentFormPage />} /> */}
                   <Route path="data" element={<FamilyData />} />
                   <Route path="edit" element={<FamilyFormPage />} />
                 </Route>

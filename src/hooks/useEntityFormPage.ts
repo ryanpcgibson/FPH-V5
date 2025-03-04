@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 
 interface EntityFormPageConfig<T, V> {
   entityId?: number;
-  familyId?: number;
   entityType: string;
   findEntity: (data: any, id: number) => T | undefined;
   createEntity: (data: V) => Promise<any>;
@@ -12,41 +10,8 @@ interface EntityFormPageConfig<T, V> {
   deleteEntity: (id: number) => Promise<any>;
 }
 
-/**
- * A custom hook that provides reusable form handling logic for entity (pets, locations, etc.) creation and editing pages.
- *
- * This hook encapsulates common functionality needed across different entity forms including:
- * - Family selection handling
- * - Entity creation/updating/deletion
- * - Navigation after form actions
- * - Loading and error states
- *
- * @template T - The type of the entity being managed (e.g., Pet, Location)
- * @template V - The type of form values used for creating/updating the entity
- *
- * @param config - Configuration object containing:
- *   - entityId: Optional ID of existing entity being edited
- *   - familyId: Optional ID of the family context
- *   - entityType: String identifier of the entity type (e.g., "pet", "location")
- *   - findEntity: Function to find an entity in the family data
- *   - createEntity: Function to create a new entity
- *   - updateEntity: Function to update an existing entity
- *   - deleteEntity: Function to delete an entity
- *
- * @returns An object containing:
- *   - currentFamilyId: The currently selected family ID
- *   - entity: The current entity being edited (if any)
- *   - isLoading: Loading state from family data context
- *   - error: Error state from family data context
- *   - handleFamilyChange: Handler for family selection changes
- *   - handleDelete: Handler for entity deletion
- *   - handleSubmit: Handler for form submission (create/update)
- *   - handleCancel: Handler for canceling form operation
- *   - handleUpdate: Handler for updating an existing entity
- */
 export function useEntityFormPage<T, V>({
   entityId,
-  familyId,
   entityType,
   findEntity,
   createEntity,
@@ -54,22 +19,15 @@ export function useEntityFormPage<T, V>({
   deleteEntity,
 }: EntityFormPageConfig<T, V>) {
   const navigate = useNavigate();
-  const [currentFamilyId, setCurrentFamilyId] = useState(
-    familyId ? parseInt(String(familyId), 10) : 0
-  );
-  const { familyData, isLoading, error } = useFamilyDataContext();
+  const { selectedFamilyId, familyData } = useFamilyDataContext();
 
   const entity = entityId ? findEntity(familyData, entityId) : undefined;
-
-  const handleFamilyChange = (newFamilyId: number) => {
-    setCurrentFamilyId(newFamilyId);
-  };
 
   const handleDelete = async () => {
     if (!entityId) return;
     try {
       await deleteEntity(entityId);
-      navigate(`/app/family/${currentFamilyId}`);
+      navigate(`/app/family/${selectedFamilyId}`);
     } catch (error) {
       console.error(`Error deleting ${entityType}:`, error);
     }
@@ -78,7 +36,7 @@ export function useEntityFormPage<T, V>({
   const handleSubmit = async (values: V) => {
     const entityData = {
       ...values,
-      family_id: currentFamilyId,
+      family_id: selectedFamilyId,
     };
 
     try {
@@ -88,7 +46,7 @@ export function useEntityFormPage<T, V>({
         const newEntity = await createEntity(entityData);
         console.log(`Created new ${entityType}:`, newEntity);
       }
-      navigate(`/app/family/${currentFamilyId}`);
+      navigate(`/app/family/${selectedFamilyId}`);
     } catch (error) {
       console.error(`Error saving ${entityType}:`, error);
     }
@@ -99,11 +57,7 @@ export function useEntityFormPage<T, V>({
   };
 
   return {
-    currentFamilyId,
     entity,
-    isLoading,
-    error,
-    handleFamilyChange,
     handleDelete,
     handleSubmit,
     handleCancel,
