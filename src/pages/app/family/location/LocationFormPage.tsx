@@ -5,13 +5,11 @@ import EntityForm from "@/components/EntityForm";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import EntityFormField from "@/components/EntityFormField";
 import { useURLContext } from "@/context/URLContext";
-import { useMoments } from "@/hooks/useMoments";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { InitialFormValues } from "@/components/EntityForm";
 import ConnectedMomentsCard from "@/components/ConnectedMoments";
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
@@ -35,15 +33,21 @@ const formSchema = z.object({
     required_error: "Family ID is required",
   }),
 });
-type InitialLocationFormValues = InitialFormValues<z.infer<typeof formSchema>>;
+
+// Since start_date is both nullable on load, but required on save, we need to create a new type for the initial form values
+export type InitialLocationFormValues = Omit<
+  z.infer<typeof formSchema>,
+  "start_date"
+> & {
+  start_date: Date | null;
+};
 
 function LocationFormPage() {
   const { selectedFamilyId, selectedLocationId } = useURLContext();
   const { familyData, isLoading } = useFamilyDataContext();
-  const navigate = useNavigate();
 
   const { createLocation, updateLocation, deleteLocation } = useLocations();
-  const { connectMoment, disconnectMoment } = useMoments();
+  const navigate = useNavigate();
 
   const form = useForm<InitialLocationFormValues>({
     resolver: zodResolver(formSchema),
@@ -75,12 +79,13 @@ function LocationFormPage() {
     }
   }, [isLoading, familyData, selectedLocationId, selectedFamilyId, form]);
 
-  async function onSubmit(values: InitialLocationFormValues) {
+  // While similar, each formPage will have to manage it's own handleSubmit and handleDelete since TypeScript get's unwieldy with different types for blank form, database insert and update.  
+  const handleSubmit = async (values: InitialLocationFormValues) => {
     try {
       if (selectedLocationId) {
         await updateLocation({
           ...values,
-          start_date: values.start_date as Date, // zod will ensure not null
+          start_date: values.start_date as Date,
           end_date: values.end_date || undefined,
           family_id: selectedFamilyId!,
           id: selectedLocationId,
@@ -88,20 +93,19 @@ function LocationFormPage() {
       } else {
         await createLocation({
           ...values,
-          start_date: values.start_date as Date, // zod will ensure not null
+          start_date: values.start_date as Date,
           end_date: values.end_date || undefined,
         });
       }
-      navigate(-1); // Navigate back to the previous page after success
     } catch (error) {
-      console.error("Error saving location:", error);
+      console.error(`Error saving Location:`, error);
     }
-  }
+    navigate(-1);
+  };
 
-  const onDelete = () => {
-    if (selectedLocationId) {
-      deleteLocation(selectedLocationId);
-    }
+  const handleDelete = async () => {
+    await deleteLocation(selectedLocationId!);
+    navigate(-1);
   };
 
   return (
@@ -114,8 +118,8 @@ function LocationFormPage() {
           form={form}
           entityType="Location"
           entityId={selectedLocationId}
-          onSubmit={onSubmit}
-          onDelete={onDelete}
+          onSubmit={handleSubmit}
+          onDelete={handleDelete}
         >
           <EntityFormField
             control={form.control}

@@ -1,6 +1,7 @@
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import DatePickerWithInput from "./DatePickerWithInput";
 
 import {
@@ -18,42 +19,36 @@ import { Button } from "./ui/button";
 import { useState, ReactNode } from "react";
 import EntityFormField from "@/components/EntityFormField";
 
-// Since start_date is both nullable on load, but required on save, we need to create a new type for the initial form values
-// The Location type for existing records comes from the DB with it's own fields, like created_at, added_by, etc.
-export type InitialFormValues<T extends FieldValues> = Omit<
-  T,
-  "start_date" | "id" | "added_by" | "created_at"
-> & {
-  start_date: Date | null;
-};
-
 interface EntityFormProps<T extends FieldValues> {
   form: UseFormReturn<T>;
-  onSubmit: (values: T) => void;
+  onSubmit: (values: T) => Promise<void>;
+  onDelete: () => Promise<void>;
   entityType: string;
   entityId?: number;
-  onDelete?: () => void;
-  onCancel?: () => void;
   children: ReactNode;
 }
 
+// EntityForm contains the common fields for pet, location forms etc. It also contains the buttons, and the delete dialog.
 function EntityForm<T extends FieldValues>({
   entityType,
   entityId,
   form,
   onSubmit,
   onDelete,
-  onCancel,
   children,
 }: EntityFormProps<T>) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { isDirty } = form.formState;
   // TODO: figure out if we still need this and why (maybe if no permissions?)
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-2xl">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="w-full max-w-2xl"
+      >
         <Card>
           <CardContent className="p-3">
             <EntityFormField control={form.control} name="name" label="Name">
@@ -67,10 +62,7 @@ function EntityForm<T extends FieldValues>({
               {(field) => (
                 <DatePickerWithInput
                   date={field.value}
-                  setDate={(value) => {
-                    console.log("Setting start_date:", value);
-                    field.onChange(value);
-                  }}
+                  setDate={(value) => field.onChange(value)}
                   required={true}
                   testId="start-date-input"
                 />
@@ -94,7 +86,7 @@ function EntityForm<T extends FieldValues>({
           </CardContent>
           <CardFooter className="flex justify-between">
             <div>
-              {entityId && onDelete && (
+              {entityId && (
                 <>
                   <Button
                     type="button"
@@ -120,10 +112,7 @@ function EntityForm<T extends FieldValues>({
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => {
-                            onDelete();
-                            setShowDeleteDialog(false);
-                          }}
+                          onClick={onDelete}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                           Delete
@@ -138,7 +127,7 @@ function EntityForm<T extends FieldValues>({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCancel}
+                onClick={() => navigate(-1)}
                 data-testid="cancel-button"
               >
                 Cancel
