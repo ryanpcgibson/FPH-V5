@@ -130,6 +130,7 @@ function LocationFormPage() {
             control={form.control}
             name="map_reference"
             label="Map Reference"
+            testId="map-reference-input"
           >
             {(field) => <Input {...field} />}
           </EntityFormField>

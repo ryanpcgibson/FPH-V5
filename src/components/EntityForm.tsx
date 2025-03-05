@@ -39,7 +39,7 @@ function EntityForm<T extends FieldValues>({
 }: EntityFormProps<T>) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { isDirty } = form.formState;
-  // TODO: figure out if we still need this and why
+  // TODO: figure out if we still need this and why (maybe if no permissions?)
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
   return (
@@ -48,7 +48,7 @@ function EntityForm<T extends FieldValues>({
         <Card>
           <CardContent className="p-3">
             <EntityFormField control={form.control} name="name" label="Name">
-              {(field) => <Input {...field} />}
+              {(field) => <Input {...field} data-testid="name-input" />}
             </EntityFormField>
             <EntityFormField
               control={form.control}
@@ -63,6 +63,7 @@ function EntityForm<T extends FieldValues>({
                     field.onChange(value);
                   }}
                   required={true}
+                  testId="start-date-input"
                 />
               )}
             </EntityFormField>
@@ -76,6 +77,7 @@ function EntityForm<T extends FieldValues>({
                   date={field.value}
                   setDate={(value) => field.onChange(value)}
                   required={true}
+                  testId="end-date-input"
                 />
               )}
             </EntityFormField>

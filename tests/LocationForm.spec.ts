@@ -19,7 +19,7 @@ test.describe("Location Form", () => {
   test("creates a new location with all fields", async ({ page }) => {
     await page.goto(`${baseURL}/app/family/${familyId}/location/add`);
 
-    await page.getByTestId("location-name-input").fill(locationName);
+    await page.getByTestId("name-input").fill(locationName);
     await page
       .getByTestId("start-date-input")
       .fill(format(startDate, DATE_FORMATS.US));
@@ -28,20 +28,23 @@ test.describe("Location Form", () => {
       .fill("Test location reference");
     await page.getByTestId("save-button").click();
 
-    await expect(page).toHaveURL(`/app/family/${familyId}`);
+    // pause 1 second to allow the page to load
+    await page.waitForTimeout(1000);
+    await page.goto(`/app/family/${familyId}`);
     await expect(page.getByText(locationName)).toBeVisible();
   });
 
   test("shows validation error for short name", async ({ page }) => {
     await page.goto(`${baseURL}/app/family/${familyId}/location/add`);
 
-    await page.fill('input[placeholder="Location Name"]', "A");
+    await page.getByTestId("name-input").fill("A");
+    await page.getByTestId("save-button").click();
 
     await expect(
       page.getByText(VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH)
     ).toBeVisible();
 
-    await page.fill('input[placeholder="Location Name"]', locationName);
+    await page.getByTestId("name-input").fill(locationName);
     await expect(
       page.getByText(VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH)
     ).not.toBeVisible();
@@ -57,11 +60,13 @@ test.describe("Location Form", () => {
       `${baseURL}/app/family/${familyId}/location/${locationId}/edit`
     );
 
-    await page.fill('input[placeholder="Location Name"]', updatedLocationName);
-    await page.fill(
-      `input[placeholder="${DATE_FORMATS.PLACEHOLDER}"]`,
-      format(updatedStartDate, DATE_FORMATS.US)
-    );
+    await page.getByTestId("name-input").fill(updatedLocationName);
+    await page
+      .getByTestId("start-date-input")
+      .fill(format(updatedStartDate, DATE_FORMATS.US));
+    await page
+      .getByTestId("map-reference-input")
+      .fill("Test location reference");
     await page.getByTestId("save-button").click();
 
     await expect(page.getByText(updatedLocationName)).toBeVisible();

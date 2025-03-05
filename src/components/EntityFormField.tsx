@@ -12,6 +12,7 @@ interface EntityFormFieldProps<T extends FieldValues> {
   name: string;
   label: string;
   children: (field: any) => ReactNode;
+  testId?: string;
 }
 
 const EntityFormField = <T extends FieldValues>({
@@ -19,6 +20,7 @@ const EntityFormField = <T extends FieldValues>({
   name,
   label,
   children,
+  testId,
 }: EntityFormFieldProps<T>) => {
   return (
     <Controller
@@ -28,7 +30,9 @@ const EntityFormField = <T extends FieldValues>({
         <FormItem className="grid grid-cols-[100px_1fr] gap-4 items-center">
           <FormLabel className="col-span-1 text-right">{label}</FormLabel>
           <div className="col-span-1 w-full max-w-[300px]">
-            <FormControl className="text-left">{children(field)}</FormControl>
+            <FormControl className="text-left" data-testid={testId}>
+              {children(field)}
+            </FormControl>
             {fieldState.error && (
               <FormMessage>{fieldState.error.message}</FormMessage>
             )}
