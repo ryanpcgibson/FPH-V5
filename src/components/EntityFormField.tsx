@@ -30,7 +30,10 @@ const EntityFormField = <T extends FieldValues>({
         <FormItem className="grid grid-cols-[100px_1fr] gap-4 items-center">
           <FormLabel className="col-span-1 text-right">{label}</FormLabel>
           <div className="col-span-1 w-full max-w-[300px]">
-            <FormControl className="text-left" data-testid={testId}>
+            <FormControl
+              className="text-left bg-background"
+              data-testid={testId}
+            >
               {children(field)}
             </FormControl>
             {fieldState.error && (

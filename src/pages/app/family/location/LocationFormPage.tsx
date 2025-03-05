@@ -37,6 +37,7 @@ const formSchema = z.object({
     required_error: "Family ID is required",
   }),
 });
+type InitialLocationFormValues = InitialFormValues<z.infer<typeof formSchema>>;
 
 function LocationFormPage() {
   const { selectedFamilyId, selectedLocationId } = useURLContext();
@@ -46,7 +47,7 @@ function LocationFormPage() {
   const { createLocation, updateLocation, deleteLocation } = useLocations();
   const { connectMoment, disconnectMoment } = useMoments();
 
-  const form = useForm<InitialFormValues<z.infer<typeof formSchema>>>({
+  const form = useForm<InitialLocationFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -76,7 +77,7 @@ function LocationFormPage() {
     }
   }, [isLoading, familyData, selectedLocationId, selectedFamilyId, form]);
 
-  async function onSubmit(values: InitialFormValues) {
+  async function onSubmit(values: InitialLocationFormValues) {
     try {
       if (selectedLocationId) {
         await updateLocation({
@@ -111,7 +112,7 @@ function LocationFormPage() {
         className="w-full flex flex-col md:flex-row gap-4 items-start justify-center pt-4"
         data-testid={"location-form-container"}
       >
-        <EntityForm<InitialFormValues>
+        <EntityForm<InitialLocationFormValues>
           form={form}
           entityType="Location"
           entityId={selectedLocationId}
