@@ -6,15 +6,13 @@ import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import EntityFormField from "@/components/EntityFormField";
 import { useURLContext } from "@/context/URLContext";
 import { useMoments } from "@/hooks/useMoments";
-import { CardHeader, CardTitle } from "@/components/ui/card";
-import EntityConnectionManager from "@/components/EntityConnectionManager";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { InitialFormValues } from "@/components/EntityForm";
+import ConnectedMomentsCard from "@/components/ConnectedMoments";
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
   map_reference: z.string().optional(),
@@ -129,38 +127,10 @@ function LocationFormPage() {
           </EntityFormField>
         </EntityForm>
         {selectedLocationId && (
-          <Card className="w-full max-w-2xl">
-            <CardHeader>
-              <CardTitle>Connected Moments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-2">
-                <div className="text-sm text-muted-foreground">
-                  Changes to connections are saved immediately
-                </div>
-                <EntityConnectionManager
-                  entityType="moment"
-                  connectedEntities={
-                    familyData?.moments?.filter((m) =>
-                      m.locations?.some((l) => l.id === selectedLocationId)
-                    ) || []
-                  }
-                  availableEntities={
-                    familyData?.moments.filter(
-                      (m) =>
-                        !m.locations?.some((l) => l.id === selectedLocationId)
-                    ) || []
-                  }
-                  onConnect={(momentId) =>
-                    connectMoment(momentId, selectedLocationId!, "location")
-                  }
-                  onDisconnect={(momentId) =>
-                    disconnectMoment(momentId, selectedLocationId!, "location")
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <ConnectedMomentsCard
+            entityId={selectedLocationId}
+            entityType="location"
+          />
         )}
       </div>
     </div>
