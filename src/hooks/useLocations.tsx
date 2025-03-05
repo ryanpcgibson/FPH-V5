@@ -8,6 +8,7 @@ export function useLocations() {
 
   const createLocationMutation = useMutation({
     mutationFn: async (locationData: LocationInsert) => {
+      console.log("createLocationMutation", locationData);
       const preparedData = prepareEntityForDB(locationData);
       const { data, error } = await supabaseClient
         .from("locations")

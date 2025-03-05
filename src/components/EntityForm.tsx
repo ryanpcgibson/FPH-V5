@@ -38,6 +38,7 @@ function EntityForm<T extends FieldValues>({
   children,
 }: EntityFormProps<T>) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { isDirty } = form.formState;
   // TODO: figure out if we still need this and why
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
@@ -57,7 +58,10 @@ function EntityForm<T extends FieldValues>({
               {(field) => (
                 <DatePickerWithInput
                   date={field.value}
-                  setDate={(value) => field.onChange(value)}
+                  setDate={(value) => {
+                    console.log("Setting start_date:", value);
+                    field.onChange(value);
+                  }}
                   required={true}
                 />
               )}
@@ -130,7 +134,7 @@ function EntityForm<T extends FieldValues>({
               </Button>
               <Button
                 type="submit"
-                disabled={isSaveDisabled}
+                disabled={isSaveDisabled || !isDirty}
                 data-testid="save-button"
               >
                 Save

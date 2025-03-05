@@ -1,3 +1,5 @@
+// DELETE?
+
 export const VALIDATION_MESSAGES = {
   PET: {
     NAME_MIN_LENGTH: "Pet name must be at least 2 characters",

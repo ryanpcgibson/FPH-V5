@@ -10,8 +10,10 @@ import { CardHeader, CardTitle } from "@/components/ui/card";
 import EntityConnectionManager from "@/components/EntityConnectionManager";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
@@ -46,43 +48,62 @@ export type InitialFormValues = Omit<
 
 function LocationFormPage() {
   const { selectedFamilyId, selectedLocationId } = useURLContext();
-  const { familyData } = useFamilyDataContext();
-
-  const foundLocation = selectedLocationId
-    ? familyData?.locations.find(
-        (location) => location.id === selectedLocationId
-      )
-    : null;
-
-  const initialLocationFormValues: InitialFormValues = {
-    name: foundLocation?.name || "",
-    map_reference: foundLocation?.map_reference || "",
-    start_date: foundLocation?.start_date || null,
-    end_date: foundLocation?.end_date || null,
-    family_id: selectedFamilyId!,
-  };
+  const { familyData, isLoading } = useFamilyDataContext();
+  const navigate = useNavigate();
 
   const { createLocation, updateLocation, deleteLocation } = useLocations();
   const { connectMoment, disconnectMoment } = useMoments();
 
   const form = useForm<InitialFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialLocationFormValues,
+    defaultValues: {
+      name: "",
+      map_reference: "",
+      start_date: null,
+      end_date: null,
+      family_id: selectedFamilyId!,
+    },
   });
 
-  function onSubmit(values: InitialFormValues) {
-    if (initialLocationFormValues) {
-      updateLocation({
-        ...values,
-        start_date: values.start_date as Date, // zod will ensure not null
-        end_date: values.end_date || undefined,
+  useEffect(() => {
+    if (!isLoading && familyData) {
+      const foundLocation = selectedLocationId
+        ? familyData.locations.find(
+            (location) => location.id === selectedLocationId
+          )
+        : null;
+      console.log("foundLocation", foundLocation);
+
+      form.reset({
+        name: foundLocation?.name || "",
+        map_reference: foundLocation?.map_reference || "",
+        start_date: foundLocation?.start_date || null,
+        end_date: foundLocation?.end_date || null,
+        family_id: selectedFamilyId!,
       });
-    } else {
-      createLocation({
-        ...values,
-        start_date: values.start_date as Date, // zod will ensure not null
-        end_date: values.end_date || undefined,
-      });
+    }
+  }, [isLoading, familyData, selectedLocationId, selectedFamilyId, form]);
+
+  async function onSubmit(values: InitialFormValues) {
+    try {
+      if (selectedLocationId) {
+        await updateLocation({
+          ...values,
+          start_date: values.start_date as Date, // zod will ensure not null
+          end_date: values.end_date || undefined,
+          family_id: selectedFamilyId!,
+          id: selectedLocationId,
+        });
+      } else {
+        await createLocation({
+          ...values,
+          start_date: values.start_date as Date, // zod will ensure not null
+          end_date: values.end_date || undefined,
+        });
+      }
+      navigate(-1); // Navigate back to the previous page after success
+    } catch (error) {
+      console.error("Error saving location:", error);
     }
   }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DayPicker } from "react-day-picker";
 import { format, parse, isValid } from "date-fns";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,10 @@ const DatePickerWithInput: React.FC<DatePickerWithInputProps> = ({
   const [inputValue, setInputValue] = useState(
     date ? format(date, DATE_FORMATS.US) : ""
   );
+
+  useEffect(() => {
+    setInputValue(date ? format(date, DATE_FORMATS.US) : "");
+  }, [date]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
