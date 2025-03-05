@@ -3,11 +3,15 @@ import { VALIDATION_MESSAGES } from "@/constants/validationMessages";
 import { useLocations } from "@/hooks/useLocations";
 import EntityForm from "@/components/EntityForm";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
+import EntityFormField from "@/components/EntityFormField";
 import { useURLContext } from "@/context/URLContext";
 import { useMoments } from "@/hooks/useMoments";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import EntityConnectionManager from "@/components/EntityConnectionManager";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
@@ -32,6 +36,7 @@ const formSchema = z.object({
   }),
 });
 // Since start_date is both nullable on load, but required on save, we need to create a new type for the initial form values
+// The Location type for existing records comes from the DB with it's own fields, like created_at, added_by, etc.
 export type InitialFormValues = Omit<
   z.infer<typeof formSchema>,
   "start_date" | "id" | "added_by" | "created_at"
@@ -60,6 +65,11 @@ function LocationFormPage() {
   const { createLocation, updateLocation, deleteLocation } = useLocations();
   const { connectMoment, disconnectMoment } = useMoments();
 
+  const form = useForm<InitialFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: initialLocationFormValues,
+  });
+
   function onSubmit(values: InitialFormValues) {
     if (initialLocationFormValues) {
       updateLocation({
@@ -76,43 +86,60 @@ function LocationFormPage() {
     }
   }
 
+  const onDelete = () => {
+    if (selectedLocationId) {
+      deleteLocation(selectedLocationId);
+    }
+  };
+
   return (
     <>
       <EntityForm<InitialFormValues>
-        formSchema={formSchema}
-        initialFormValues={initialLocationFormValues}
+        form={form}
+        entityType="Location"
+        entityId={selectedLocationId}
         onSubmit={onSubmit}
-      />
+        onDelete={onDelete}
+      >
+        <EntityFormField
+          control={form.control}
+          name="map_reference"
+          label="Map Reference"
+        >
+          {(field) => <Input {...field} />}
+        </EntityFormField>
+      </EntityForm>
       {selectedLocationId && (
         <Card>
           <CardHeader>
             <CardTitle>Connected Moments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-2">
-                <div className="text-sm text-muted-foreground">
-                  Changes to connections are saved immediately
-                </div>
-                <EntityConnectionManager
-                  entityType="moment"
-                  connectedEntities={
-                    familyData?.moments?.filter((m) =>
-                      m.locations?.some((l) => l.id === selectedLocationId)
-                    ) || []
-                  }
-                  availableEntities={
-                    familyData?.moments.filter(
-                      (m) => !m.locations?.some((l) => l.id === selectedLocationId)
-                    ) || []
-                  }
-                  onConnect={(momentId) =>
-                    connectMoment(momentId, selectedLocationId!, "location")
-                  }
-                  onDisconnect={(momentId) =>
-                    disconnectMoment(momentId, selectedLocationId!, "location")
-                  }
-                />
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-2">
+              <div className="text-sm text-muted-foreground">
+                Changes to connections are saved immediately
               </div>
+              <EntityConnectionManager
+                entityType="moment"
+                connectedEntities={
+                  familyData?.moments?.filter((m) =>
+                    m.locations?.some((l) => l.id === selectedLocationId)
+                  ) || []
+                }
+                availableEntities={
+                  familyData?.moments.filter(
+                    (m) =>
+                      !m.locations?.some((l) => l.id === selectedLocationId)
+                  ) || []
+                }
+                onConnect={(momentId) =>
+                  connectMoment(momentId, selectedLocationId!, "location")
+                }
+                onDisconnect={(momentId) =>
+                  disconnectMoment(momentId, selectedLocationId!, "location")
+                }
+              />
+            </div>
           </CardContent>
         </Card>
       )}
