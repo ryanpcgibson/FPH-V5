@@ -10,11 +10,11 @@ import { CardHeader, CardTitle } from "@/components/ui/card";
 import EntityConnectionManager from "@/components/EntityConnectionManager";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useForm, useFormContext } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-
+import { InitialFormValues } from "@/components/EntityForm";
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
   map_reference: z.string().optional(),
@@ -37,14 +37,6 @@ const formSchema = z.object({
     required_error: "Family ID is required",
   }),
 });
-// Since start_date is both nullable on load, but required on save, we need to create a new type for the initial form values
-// The Location type for existing records comes from the DB with it's own fields, like created_at, added_by, etc.
-export type InitialFormValues = Omit<
-  z.infer<typeof formSchema>,
-  "start_date" | "id" | "added_by" | "created_at"
-> & {
-  start_date: Date | null;
-};
 
 function LocationFormPage() {
   const { selectedFamilyId, selectedLocationId } = useURLContext();
@@ -54,7 +46,7 @@ function LocationFormPage() {
   const { createLocation, updateLocation, deleteLocation } = useLocations();
   const { connectMoment, disconnectMoment } = useMoments();
 
-  const form = useForm<InitialFormValues>({
+  const form = useForm<InitialFormValues<z.infer<typeof formSchema>>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",

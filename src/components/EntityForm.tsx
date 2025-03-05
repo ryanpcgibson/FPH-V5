@@ -18,6 +18,15 @@ import { Button } from "./ui/button";
 import { useState, ReactNode } from "react";
 import EntityFormField from "@/components/EntityFormField";
 
+// Since start_date is both nullable on load, but required on save, we need to create a new type for the initial form values
+// The Location type for existing records comes from the DB with it's own fields, like created_at, added_by, etc.
+export type InitialFormValues<T extends FieldValues> = Omit<
+  T,
+  "start_date" | "id" | "added_by" | "created_at"
+> & {
+  start_date: Date | null;
+};
+
 interface EntityFormProps<T extends FieldValues> {
   form: UseFormReturn<T>;
   onSubmit: (values: T) => void;
