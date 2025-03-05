@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,17 +7,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useURLContext } from "@/context/URLContext";
 
 const AddItemButton = ({ headerWidth }: { headerWidth: number }) => {
   const navigate = useNavigate();
-  const { familyId } = useParams<{ familyId: string }>();
+  const { selectedFamilyId } = useURLContext();
 
   const handleAddPet = () => {
-    navigate(`/app/family/${familyId}/pet/add`);
+    navigate(`/app/family/${selectedFamilyId}/pet/add`);
   };
 
   const handleAddLocation = () => {
-    navigate(`/app/family/${familyId}/location/add`);
+    navigate(`/app/family/${selectedFamilyId}/location/add`);
+  };
+
+  const handleAddMoment = () => {
+    navigate(`/app/family/${selectedFamilyId}/moment/add`);
   };
 
   return (
@@ -46,6 +51,9 @@ const AddItemButton = ({ headerWidth }: { headerWidth: number }) => {
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={handleAddLocation}>
                 Add Location
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={handleAddMoment}>
+                Add Moment
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
