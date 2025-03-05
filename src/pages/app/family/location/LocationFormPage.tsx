@@ -93,155 +93,63 @@ function LocationFormPage() {
   };
 
   return (
-    <>
-      <EntityForm<InitialFormValues>
-        form={form}
-        entityType="Location"
-        entityId={selectedLocationId}
-        onSubmit={onSubmit}
-        onDelete={onDelete}
+    <div className="w-full flex flex-col items-center">
+      <div
+        className="w-full flex flex-col md:flex-row gap-4 items-start justify-center pt-4"
+        data-testid={"location-form-container"}
       >
-        <EntityFormField
-          control={form.control}
-          name="map_reference"
-          label="Map Reference"
+        <EntityForm<InitialFormValues>
+          form={form}
+          entityType="Location"
+          entityId={selectedLocationId}
+          onSubmit={onSubmit}
+          onDelete={onDelete}
         >
-          {(field) => <Input {...field} />}
-        </EntityFormField>
-      </EntityForm>
-      {selectedLocationId && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Connected Moments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-2">
-              <div className="text-sm text-muted-foreground">
-                Changes to connections are saved immediately
+          <EntityFormField
+            control={form.control}
+            name="map_reference"
+            label="Map Reference"
+          >
+            {(field) => <Input {...field} />}
+          </EntityFormField>
+        </EntityForm>
+        {selectedLocationId && (
+          <Card className="w-full max-w-2xl">
+            <CardHeader>
+              <CardTitle>Connected Moments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-2">
+                <div className="text-sm text-muted-foreground">
+                  Changes to connections are saved immediately
+                </div>
+                <EntityConnectionManager
+                  entityType="moment"
+                  connectedEntities={
+                    familyData?.moments?.filter((m) =>
+                      m.locations?.some((l) => l.id === selectedLocationId)
+                    ) || []
+                  }
+                  availableEntities={
+                    familyData?.moments.filter(
+                      (m) =>
+                        !m.locations?.some((l) => l.id === selectedLocationId)
+                    ) || []
+                  }
+                  onConnect={(momentId) =>
+                    connectMoment(momentId, selectedLocationId!, "location")
+                  }
+                  onDisconnect={(momentId) =>
+                    disconnectMoment(momentId, selectedLocationId!, "location")
+                  }
+                />
               </div>
-              <EntityConnectionManager
-                entityType="moment"
-                connectedEntities={
-                  familyData?.moments?.filter((m) =>
-                    m.locations?.some((l) => l.id === selectedLocationId)
-                  ) || []
-                }
-                availableEntities={
-                  familyData?.moments.filter(
-                    (m) =>
-                      !m.locations?.some((l) => l.id === selectedLocationId)
-                  ) || []
-                }
-                onConnect={(momentId) =>
-                  connectMoment(momentId, selectedLocationId!, "location")
-                }
-                onDisconnect={(momentId) =>
-                  disconnectMoment(momentId, selectedLocationId!, "location")
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      {/* Insert connection form fields here */}
-    </>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
   );
 }
-
-// export type LocationFormValues = z.infer<typeof formSchema>;
-
-// const LocationFormPage = () => {
-//   const { locationId: locationIdParam } = useParams<{
-//     locationId?: string;
-//   }>();
-//   const locationId = locationIdParam
-//     ? parseInt(locationIdParam, 10)
-//     : undefined;
-//   const { createLocation, updateLocation, deleteLocation } = useLocations();
-//   const { form, isSaveDisabled, handleFieldChange } = useEntityFormState(
-//     formSchema,
-//     {
-//       name: initialData?.name || "",
-//       map_reference: initialData?.map_reference || "",
-//       start_date: initialData?.start_date || null,
-//       end_date: initialData?.end_date || null,
-//       family_id: familyId,
-//     }
-//   );
-
-//   const {
-//     entity: location,
-//     handleDelete,
-//     handleSubmit,
-//     handleCancel,
-//   } = useEntityFormPage<Location, LocationFormValues>({
-//     entityId: locationId,
-//     entityType: "location",
-//     findEntity: (data, id) =>
-//       data?.locations.find((l: Location) => l.id === id),
-//     createEntity: createLocation,
-//     updateEntity: updateLocation,
-//     deleteEntity: deleteLocation,
-//   });
-
-//   return (
-//     <div className="w-full h-full" id="page-container">
-//       <EntityForm
-//         form={form}
-//         entityId={locationId}
-//         entityType="Location"
-//         onDelete={handleDelete}
-//         onSubmit={handleSubmit}
-//         onCancel={handleCancel}
-//         isSaveDisabled={isSaveDisabled}
-//       >
-//         <EntityFormField
-//           control={form.control}
-//           name="name"
-//           label="Location Name"
-//         >
-//           <Input
-//             data-testid="location-name-input"
-//             placeholder="Location Name"
-//             onChange={(e) => handleFieldChange("name", e.target.value)}
-//           />
-//         </EntityFormField>
-//         <EntityFormField
-//           control={form.control}
-//           name="map_reference"
-//           label="Map Reference"
-//           placeholder="Map Reference"
-//           onChange={(e: string) => handleFieldChange("map_reference", e)}
-//         />
-//         <EntityFormField
-//           control={form.control}
-//           name="start_date"
-//           label="Start Date"
-//         >
-//           <DatePickerWithInput
-//             date={form.watch("start_date")}
-//             setDate={(value) => handleFieldChange("start_date", value)}
-//             required={true}
-//           />
-//         </EntityFormField>
-//         <EntityFormField
-//           control={form.control}
-//           name="end_date"
-//           label="End Date"
-//         />
-//         <EntityFormField
-//           control={form.control}
-//           name="moment_connection"
-//           label="Moment Connection"
-//         />
-//         <EntityFormField
-//           control={form.control}
-//           name="family_id"
-//           label="Family ID"
-//         />
-//       </EntityForm>
-//     </div>
-//   );
-// };
 
 export default LocationFormPage;

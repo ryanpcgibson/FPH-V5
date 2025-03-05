@@ -25,12 +25,14 @@ const EntityFormField = <T extends FieldValues>({
       control={control}
       name={name as Path<T>}
       render={({ field, fieldState }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>{children(field)}</FormControl>
-          {fieldState.error && (
-            <FormMessage>{fieldState.error.message}</FormMessage>
-          )}
+        <FormItem className="grid grid-cols-[100px_1fr] gap-4 items-center">
+          <FormLabel className="col-span-1 text-right">{label}</FormLabel>
+          <div className="col-span-1 w-full max-w-[300px]">
+            <FormControl className="text-left">{children(field)}</FormControl>
+            {fieldState.error && (
+              <FormMessage>{fieldState.error.message}</FormMessage>
+            )}
+          </div>
         </FormItem>
       )}
     />

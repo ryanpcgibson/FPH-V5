@@ -1,20 +1,5 @@
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useForm,
-  FieldValues,
-  DefaultValues,
-  Path,
-  UseFormReturn,
-} from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import DatePickerWithInput from "./DatePickerWithInput";
 
@@ -27,7 +12,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "./ui/alert-dialog";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
@@ -58,111 +42,104 @@ function EntityForm<T extends FieldValues>({
   const [isSaveDisabled, setIsSaveDisabled] = useState(false);
 
   return (
-    <div
-      className="w-full flex flex-col gap-4"
-      data-testid={`${entityType.toLowerCase()}-form-container`}
-    >
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Card>
-            <CardContent className="p-3">
-              <EntityFormField control={form.control} name="name" label="Name">
-                {(field) => <Input {...field} />}
-              </EntityFormField>
-              <EntityFormField
-                control={form.control}
-                name="start_date"
-                label="Start Date"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-2xl">
+        <Card>
+          <CardContent className="p-3">
+            <EntityFormField control={form.control} name="name" label="Name">
+              {(field) => <Input {...field} />}
+            </EntityFormField>
+            <EntityFormField
+              control={form.control}
+              name="start_date"
+              label="Start Date"
+            >
+              {(field) => (
+                <DatePickerWithInput
+                  date={field.value}
+                  setDate={(value) => field.onChange(value)}
+                  required={true}
+                />
+              )}
+            </EntityFormField>
+            <EntityFormField
+              control={form.control}
+              name={"end_date" as Path<T>}
+              label="End Date"
+            >
+              {(field) => (
+                <DatePickerWithInput
+                  date={field.value}
+                  setDate={(value) => field.onChange(value)}
+                  required={true}
+                />
+              )}
+            </EntityFormField>
+            {children}
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <div>
+              {entityId && onDelete && (
+                <>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={() => setShowDeleteDialog(true)}
+                    data-testid="delete-button"
+                  >
+                    Delete
+                  </Button>
+                  <AlertDialog
+                    open={showDeleteDialog}
+                    onOpenChange={setShowDeleteDialog}
+                  >
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {entityType}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this{" "}
+                          {entityType.toLowerCase()}? This action cannot be
+                          undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            onDelete();
+                            setShowDeleteDialog(false);
+                          }}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                data-testid="cancel-button"
               >
-                {(field) => (
-                  <DatePickerWithInput
-                    date={field.value}
-                    setDate={(value) => field.onChange(value)}
-                    required={true}
-                  />
-                )}
-              </EntityFormField>
-              <EntityFormField
-                control={form.control}
-                name={"end_date" as Path<T>}
-                label="End Date"
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaveDisabled}
+                data-testid="save-button"
               >
-                {(field) => (
-                  <DatePickerWithInput
-                    date={field.value}
-                    setDate={(value) => field.onChange(value)}
-                    required={true}
-                  />
-                )}
-              </EntityFormField>
-              {children}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div>
-                {entityId && onDelete && (
-                  <>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={() => setShowDeleteDialog(true)}
-                      data-testid="delete-button"
-                    >
-                      Delete
-                    </Button>
-                    <AlertDialog
-                      open={showDeleteDialog}
-                      onOpenChange={setShowDeleteDialog}
-                    >
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Delete {entityType}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this{" "}
-                            {entityType.toLowerCase()}? This action cannot be
-                            undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => {
-                              onDelete();
-                              setShowDeleteDialog(false);
-                            }}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  data-testid="cancel-button"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSaveDisabled}
-                  data-testid="save-button"
-                >
-                  Save
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        </form>
-      </Form>
-    </div>
+                Save
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
+      </form>
+    </Form>
   );
 }
 
