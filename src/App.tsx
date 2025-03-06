@@ -20,7 +20,7 @@ import FamilyData from "@/pages/app/family/FamilyDataPage";
 import FamilyFormPage from "@/pages/app/family/FamilyFormPage";
 
 import PetInfo from "@/pages/app/family/pet/PetDetailPage";
-// import PetFormPage from "@/pages/app/family/pet/PetFormPage";
+import PetFormPage from "@/pages/app/family/pet/PetFormPage";
 
 import LocationInfo from "@/pages/app/family/location/LocationDetailPage";
 import LocationFormPage from "@/pages/app/family/location/LocationFormPage";
@@ -62,8 +62,11 @@ function App() {
                 <Route path="family/:selectedFamilyId">
                   <Route index element={<TimelinePage />} />
                   <Route path="pet/:selectedPetId" element={<PetInfo />} />
-                  {/* <Route path="pet/:petId/edit" element={<PetFormPage />} /> */}
-                  {/* <Route path="pet/add" element={<PetFormPage />} /> */}
+                  <Route
+                    path="pet/:selectedPetId/edit"
+                    element={<PetFormPage />}
+                  />
+                  <Route path="pet/add" element={<PetFormPage />} />
                   <Route
                     path="location/:selectedLocationId"
                     element={<LocationInfo />}

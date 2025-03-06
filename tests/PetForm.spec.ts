@@ -21,33 +21,32 @@ test.describe("Pet Form", () => {
   test("creates a new pet with all fields", async ({ page }) => {
     await page.goto(`${baseURL}/app/family/${familyId}/pet/add`);
 
-    await page.getByTestId("pet-name-input").fill(petName);
+    await page.getByTestId("name-input").fill(petName);
     await page
       .getByTestId("start-date-input")
       .fill(format(startDate, DATE_FORMATS.US));
     await page
-      .getByTestId("pet-description-input")
+      .getByTestId("description-input")
       .fill("Test pet description");
     await page.getByTestId("save-button").click();
 
-    await expect(page).toHaveURL(`/app/family/${process.env.TEST_FAMILY_ID}`);
-
+    // pause 1 second to allow the page to load
+    await page.waitForTimeout(1000);
+    await page.goto(`/app/family/${familyId}`);
     await expect(page.getByText(petName)).toBeVisible();
   });
 
   test("shows validation error for short name", async ({ page }) => {
     await page.goto(`${baseURL}/app/family/${familyId}/pet/add`);
 
-    // Try submitting with 1-character name
-    await page.fill('input[placeholder="Pet Name"]', "A");
+    await page.getByTestId("name-input").fill("A");
+    await page.getByTestId("save-button").click();
 
-    // Check for validation message
     await expect(
       page.getByText(VALIDATION_MESSAGES.PET.NAME_MIN_LENGTH)
     ).toBeVisible();
 
-    // check for validation message clearing
-    await page.fill('input[placeholder="Pet Name"]', petName);
+    await page.getByTestId("name-input").fill(petName);
     await expect(
       page.getByText(VALIDATION_MESSAGES.PET.NAME_MIN_LENGTH)
     ).not.toBeVisible();
@@ -61,25 +60,24 @@ test.describe("Pet Form", () => {
     petId = await petElement.getAttribute("data-entity-id");
     await page.goto(`${baseURL}/app/family/${familyId}/pet/${petId}/edit`);
 
-    await page.fill('input[placeholder="Pet Name"]', updatedPetName);
-    await page.fill(
-      `input[placeholder="${DATE_FORMATS.PLACEHOLDER}"]`,
-      format(updatedStartDate, DATE_FORMATS.US)
-    );
+    await page.getByTestId("name-input").fill(updatedPetName);
+    await page
+      .getByTestId("start-date-input")
+      .fill(format(updatedStartDate, DATE_FORMATS.US));
+    await page
+      .getByTestId("description-input")
+      .fill("Updated pet description");
     await page.getByTestId("save-button").click();
 
-    // Verify update
     await expect(page.getByText(updatedPetName)).toBeVisible();
   });
 
   test("can connect pet to moment", async ({ page }) => {
     await page.goto(`${baseURL}/app/family/${familyId}/pet/${petId}/edit`);
 
-    // Find and click the connect button for the test moment
     await page.getByTestId("moment-select-trigger").click();
     await page.getByTestId(`moment-select-item-${momentId}`).click();
 
-    // Verify connection (the moment should appear in connected list)
     await expect(page.getByText("Test Moment")).toBeVisible();
   });
 

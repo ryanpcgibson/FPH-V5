@@ -1,16 +1,19 @@
+import { useEffect } from "react";
 import { z } from "zod";
-import { VALIDATION_MESSAGES } from "@/constants/validationMessages";
-import { useLocations } from "@/hooks/useLocations";
-import EntityForm from "@/components/EntityForm";
-import { useFamilyDataContext } from "@/context/FamilyDataContext";
-import EntityFormField from "@/components/EntityFormField";
-import { useURLContext } from "@/context/URLContext";
-import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+
+import { VALIDATION_MESSAGES } from "@/constants/validationMessages";
+import { useLocations } from "@/hooks/useLocations";
+import { useFamilyDataContext } from "@/context/FamilyDataContext";
+import { useURLContext } from "@/context/URLContext";
+
+import EntityForm from "@/components/EntityForm";
+import EntityFormField from "@/components/EntityFormField";
+import { Input } from "@/components/ui/input";
 import ConnectedMomentsCard from "@/components/ConnectedMoments";
+
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
   map_reference: z.string().optional(),
@@ -67,8 +70,7 @@ function LocationFormPage() {
             (location) => location.id === selectedLocationId
           )
         : null;
-      console.log("foundLocation", foundLocation);
-
+      console.log("foundLocation:", foundLocation);
       form.reset({
         name: foundLocation?.name || "",
         map_reference: foundLocation?.map_reference || "",
@@ -79,7 +81,7 @@ function LocationFormPage() {
     }
   }, [isLoading, familyData, selectedLocationId, selectedFamilyId, form]);
 
-  // While similar, each formPage will have to manage it's own handleSubmit and handleDelete since TypeScript get's unwieldy with different types for blank form, database insert and update.  
+  // While similar, each formPage will have to manage it's own handleSubmit and handleDelete since TypeScript get's unwieldy with different types for blank form, database insert and update.
   const handleSubmit = async (values: InitialLocationFormValues) => {
     try {
       if (selectedLocationId) {
