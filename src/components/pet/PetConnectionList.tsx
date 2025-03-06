@@ -9,9 +9,9 @@ import DetailListItem, {
   createDisconnectItem,
 } from "@/components/DetailListItem";
 import EntityLink from "@/components/EntityLink";
-
+import { useURLContext } from "@/context/URLContext";
 interface PetConnectionListProps {
-  petId: number | null;
+  petId: number | undefined;
   onMomentClick: (momentId: number) => void;
   currentMomentId?: number;
 }
@@ -30,7 +30,8 @@ const PetConnectionList: React.FC<PetConnectionListProps> = ({
   onMomentClick,
   currentMomentId,
 }) => {
-  const { familyData, selectedFamilyId } = useFamilyDataContext();
+  const { familyData } = useFamilyDataContext();
+  const { selectedFamilyId } = useURLContext();
   const { disconnectMoment } = useMoments();
   const navigate = useNavigate();
 

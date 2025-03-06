@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { FamilyData, Moment } from "@/db/db_types";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import PetCarousel from "@/components/pet/PetCarousel";
 import PetConnectionList from "@/components/pet/PetConnectionList";
-
+import { useURLContext } from "@/context/URLContext";
 const PetDetailPage: React.FC = () => {
-  const { petId: petIdParam } = useParams<{ petId: string }>();
-  const petId = petIdParam ? parseInt(petIdParam, 10) : null;
   const { familyData } = useFamilyDataContext();
+  const { selectedPetId } = useURLContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,9 +15,9 @@ const PetDetailPage: React.FC = () => {
   const [currentMomentIndex, setCurrentMomentIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (familyData && petId) {
+    if (familyData && selectedPetId) {
       const petMoments = familyData.moments.filter((moment: Moment) =>
-        moment.pets?.some((pet: { id: number }) => pet.id === petId)
+        moment.pets?.some((pet: { id: number }) => pet.id === selectedPetId)
       );
       setMoments(petMoments);
 
@@ -41,7 +40,7 @@ const PetDetailPage: React.FC = () => {
         setCurrentMomentIndex(0);
       }
     }
-  }, [familyData, petId, location.search, navigate]);
+  }, [familyData, selectedPetId, location.search, navigate]);
 
   useEffect(() => {
     if (moments.length > 0) {
@@ -80,7 +79,7 @@ const PetDetailPage: React.FC = () => {
         id="pet-detail-container"
       >
         <PetConnectionList
-          petId={petId}
+          petId={selectedPetId}
           onMomentClick={handleMomentClick}
           currentMomentId={moments[currentMomentIndex]?.id}
         />

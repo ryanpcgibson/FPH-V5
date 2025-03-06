@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo } from "react";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import { Pet, Moment } from "@/db/db_types";
 import type { PetTimeline, PetTimelineSegment } from "@/types/timeline";
-import { useParams } from "react-router-dom";
+import { useURLContext } from "@/context/URLContext";
 
 type PetStatus =
   | "birth"
@@ -125,8 +125,7 @@ const PetTimelineProvider: React.FC<{
     selectedFamilyId,
     isLoading: isFamilyLoading,
   } = useFamilyDataContext();
-  const { petId: petIdParam } = useParams<{ petId?: string }>();
-  const selectedPetId = petIdParam ? parseInt(petIdParam, 10) : null;
+  const { selectedPetId } = useURLContext();
   const selectedPetName = selectedPetId
     ? familyData?.pets.find((pet) => pet.id === selectedPetId)?.name ?? null
     : null;

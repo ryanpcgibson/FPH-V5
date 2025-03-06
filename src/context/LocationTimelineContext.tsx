@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useMemo } from "react";
-import { useParams } from "react-router-dom";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import { Location, Moment } from "@/db/db_types";
 import type {
   LocationTimeline,
   LocationTimelineSegment,
 } from "@/types/timeline";
+import { useURLContext } from "@/context/URLContext";
 
 type LocationStatus =
   | "move-in"
@@ -136,11 +136,7 @@ const LocationTimelineProvider: React.FC<{
     selectedFamilyId,
     isLoading: isFamilyLoading,
   } = useFamilyDataContext();
-
-  const { locationId: locationIdParam } = useParams<{ locationId?: string }>();
-  const selectedLocationId = locationIdParam
-    ? parseInt(locationIdParam, 10)
-    : null;
+  const { selectedLocationId } = useURLContext();
   const selectedLocationName = selectedLocationId
     ? familyData?.locations.find(
         (location) => location.id === selectedLocationId

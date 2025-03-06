@@ -9,9 +9,10 @@ import DetailListItem, {
   createDisconnectItem,
 } from "@/components/DetailListItem";
 import EntityLink from "@/components/EntityLink";
+import { useURLContext } from "@/context/URLContext";
 
 interface LocationConnectionListProps {
-  locationId: number | null;
+  locationId: number | undefined;
   onMomentClick: (momentId: number) => void;
   currentMomentId?: number;
 }
@@ -30,7 +31,8 @@ const LocationConnectionList: React.FC<LocationConnectionListProps> = ({
   onMomentClick,
   currentMomentId,
 }) => {
-  const { familyData, selectedFamilyId } = useFamilyDataContext();
+  const { familyData } = useFamilyDataContext();
+  const { selectedFamilyId } = useURLContext();
   const { disconnectMoment } = useMoments();
   const navigate = useNavigate();
 

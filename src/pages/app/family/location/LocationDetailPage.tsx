@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { FamilyData, Moment } from "@/db/db_types";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
-import { Card, CardContent } from "@/components/ui/card";
 import PetCarousel from "@/components/pet/PetCarousel";
 import LocationConnectionList from "@/components/location/LocationConnectionList";
+import { useURLContext } from "@/context/URLContext";
 
 const LocationDetailPage: React.FC = () => {
-  const { locationId: locationIdParam } = useParams<{ locationId: string }>();
-  const locationId = locationIdParam ? parseInt(locationIdParam, 10) : null;
   const { familyData } = useFamilyDataContext();
+  const { selectedLocationId } = useURLContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,9 +16,9 @@ const LocationDetailPage: React.FC = () => {
   const [currentMomentIndex, setCurrentMomentIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (familyData && locationId) {
+    if (familyData && selectedLocationId) {
       const locationMoments = familyData.moments.filter((moment: Moment) =>
-        moment.locations?.some((loc) => loc.id === locationId)
+        moment.locations?.some((loc) => loc.id === selectedLocationId)
       );
       setMoments(locationMoments);
 
@@ -41,7 +40,7 @@ const LocationDetailPage: React.FC = () => {
         setCurrentMomentIndex(0);
       }
     }
-  }, [familyData, locationId, location.search, navigate]);
+  }, [familyData, selectedLocationId, location.search, navigate]);
 
   useEffect(() => {
     if (moments.length > 0) {
@@ -80,7 +79,7 @@ const LocationDetailPage: React.FC = () => {
         id="location-detail-container"
       >
         <LocationConnectionList
-          locationId={locationId}
+          locationId={selectedLocationId}
           onMomentClick={handleMomentClick}
           currentMomentId={moments[currentMomentIndex]?.id}
         />

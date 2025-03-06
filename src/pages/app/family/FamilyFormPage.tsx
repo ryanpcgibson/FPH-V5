@@ -1,22 +1,23 @@
-import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useFamilyDataContext } from "@/context/FamilyDataContext";
 import FamilyForm from "@/components/family/FamilyForm";
 import { useFamilies } from "@/hooks/useFamilies";
 import type { FamilyInsert } from "@/db/db_types";
+import { useURLContext } from "@/context/URLContext";
 
 const FamilyFormPage = () => {
-  const { familyId: familyIdParam } = useParams<{ familyId?: string }>();
-  const familyId = familyIdParam ? parseInt(familyIdParam, 10) : undefined;
+  const { selectedFamilyId } = useURLContext();
   const navigate = useNavigate();
   const { families = [], familyData } = useFamilyDataContext();
-  const family = familyId ? families.find((f) => f.id === familyId) : undefined;
+  const family = selectedFamilyId
+    ? families.find((f) => f.id === selectedFamilyId)
+    : undefined;
   const { deleteFamily, updateFamily, createFamily } = useFamilies();
 
   const handleDelete = async () => {
-    if (!familyId) return;
+    if (!selectedFamilyId) return;
     try {
-      await deleteFamily(familyId);
+      await deleteFamily(selectedFamilyId);
       navigate("/app/families");
     } catch (error) {
       console.error("Error deleting family:", error);
@@ -25,9 +26,9 @@ const FamilyFormPage = () => {
 
   const handleSubmit = async (values: FamilyInsert) => {
     try {
-      if (familyId) {
-        await updateFamily({ ...values, id: familyId });
-        navigate(`/app/family/${familyId}`);
+      if (selectedFamilyId) {
+        await updateFamily({ ...values, id: selectedFamilyId });
+        navigate(`/app/family/${selectedFamilyId}`);
       } else {
         const newFamily = await createFamily(values);
         navigate(`/app/family/${newFamily.id}`);
@@ -43,7 +44,7 @@ const FamilyFormPage = () => {
 
   return (
     <FamilyForm
-      familyId={familyId}
+      familyId={selectedFamilyId}
       initialData={
         familyData && family?.name ? { name: family.name } : undefined
       }
