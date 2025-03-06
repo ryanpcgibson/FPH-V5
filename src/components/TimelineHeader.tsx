@@ -23,7 +23,7 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({
           <div
             key={index}
             style={{ width: `${cellWidth}px` }}
-            className="h-10 box-border flex items-center justify-center font-bold rounded-lg bg-foreground text-background border-2 border-background"
+            className="h-10 box-border flex items-center justify-center font-bold rounded-lg bg-foreground text-background border-x-2 border-b-2 border-background"
             id={`column-header-${index}`}
           >
             {header}

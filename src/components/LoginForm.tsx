@@ -86,7 +86,7 @@ function LoginForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email Address</FormLabel>
-              <FormControl>
+              <FormControl className="bg-background">
                 <Input type="email" {...field} />
               </FormControl>
               <FormMessage />
@@ -99,7 +99,7 @@ function LoginForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Password</FormLabel>
-              <FormControl>
+              <FormControl className="bg-background">
                 <Input type="password" {...field} />
               </FormControl>
               <FormMessage />
