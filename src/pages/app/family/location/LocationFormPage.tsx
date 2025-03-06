@@ -12,7 +12,7 @@ import { useURLContext } from "@/context/URLContext";
 import EntityForm from "@/components/EntityForm";
 import EntityFormField from "@/components/EntityFormField";
 import { Input } from "@/components/ui/input";
-import ConnectedMomentsCard from "@/components/ConnectedMoments";
+import ConnectedMoments from "@/components/ConnectedMoments";
 
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.LOCATION.NAME_MIN_LENGTH),
@@ -133,7 +133,7 @@ function LocationFormPage() {
           </EntityFormField>
         </EntityForm>
         {selectedLocationId && (
-          <ConnectedMomentsCard
+          <ConnectedMoments
             entityId={selectedLocationId}
             entityType="location"
           />

@@ -1,9 +1,51 @@
-import React from "react";
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { VALIDATION_MESSAGES } from "@/constants/validationMessages";
+import { useLocations } from "@/hooks/useLocations";
+import { useFamilyDataContext } from "@/context/FamilyDataContext";
+import { useURLContext } from "@/context/URLContext";
+
+import EntityForm from "@/components/EntityForm";
+import EntityFormField from "@/components/EntityFormField";
+import { Input } from "@/components/ui/input";
+import ConnectedMoments from "@/components/ConnectedMoments";
 import { useMoments } from "@/hooks/useMoments";
-import MomentForm from "@/components/moment/MomentForm";
-import { useEntityFormPage } from "@/hooks/useEntityFormPage";
-import type { Moment } from "@/db/db_types";
+
+const formSchema = z.object({
+  title: z.string().min(2, VALIDATION_MESSAGES.MOMENT.TITLE_MIN_LENGTH),
+  body: z.string().optional(),
+  start_date: z
+    .date({
+      required_error: VALIDATION_MESSAGES.MOMENT.START_DATE_REQUIRED,
+      invalid_type_error: VALIDATION_MESSAGES.MOMENT.INVALID_DATE,
+    })
+    .nullable()
+    .refine((date) => date !== null, {
+      message: VALIDATION_MESSAGES.MOMENT.START_DATE_REQUIRED,
+    }),
+  end_date: z
+    .date({
+      invalid_type_error: VALIDATION_MESSAGES.MOMENT.INVALID_DATE,
+    })
+    .nullable(),
+  pet_connection: z.string().optional(),
+  location_connection: z.string().optional(),
+  family_id: z.number({
+    required_error: "Family ID is required",
+  }),
+});
+
+// Since start_date is both nullable on load, but required on save, we need to create a new type for the initial form values
+export type InitialMomentFormValues = Omit<
+  z.infer<typeof formSchema>,
+  "start_date"
+> & {
+  start_date: Date | null;
+};
 
 interface MomentFormValues {
   title: string;
@@ -15,47 +57,92 @@ interface MomentFormValues {
 }
 
 const MomentFormPage = () => {
-  const { momentId: momentIdParam, familyId: familyIdParam } = useParams<{
-    momentId?: string;
-    familyId?: string;
-  }>();
+  const { selectedFamilyId, selectedMomentId } = useURLContext();
+  const { familyData, isLoading } = useFamilyDataContext();
 
-  const momentId = momentIdParam ? parseInt(momentIdParam, 10) : undefined;
   const { createMoment, updateMoment, deleteMoment } = useMoments();
+  const navigate = useNavigate();
 
-  const {
-    currentFamilyId,
-    entity: moment,
-    isLoading,
-    error,
-    handleFamilyChange,
-    handleDelete,
-    handleSubmit,
-    handleCancel,
-  } = useEntityFormPage<Moment, MomentFormValues>({
-    entityId: momentId,
-    familyId: familyIdParam ? parseInt(familyIdParam, 10) : undefined,
-    entityType: "moment",
-    findEntity: (data, id) => data?.moments.find((m) => m.id === id),
-    createMoment,
-    updateMoment,
-    deleteMoment,
+  const form = useForm<InitialMomentFormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      body: "",
+      start_date: null,
+      end_date: null,
+      family_id: selectedFamilyId!,
+    },
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading family data: {error.message}</div>;
+  useEffect(() => {
+    if (!isLoading && familyData) {
+      const foundMoment = selectedMomentId
+        ? familyData.moments.find((m) => m.id === selectedMomentId)
+        : null;
+      form.reset({
+        title: foundMoment?.title || "",
+        body: foundMoment?.body || "",
+        start_date: foundMoment?.start_date || null,
+        end_date: foundMoment?.end_date || null,
+        family_id: selectedFamilyId!,
+      });
+    }
+  }, [isLoading, familyData, selectedMomentId, selectedFamilyId, form]);
+
+  const handleSubmit = async (values: InitialMomentFormValues) => {
+    try {
+      if (selectedMomentId) {
+        await updateMoment({
+          ...values,
+          start_date: values.start_date as Date,
+          end_date: values.end_date || undefined,
+          family_id: selectedFamilyId!,
+          id: selectedMomentId,
+        });
+      } else {
+        await createMoment({
+          ...values,
+          start_date: values.start_date as Date,
+          end_date: values.end_date || undefined,
+        });
+      }
+    } catch (error) {
+      console.error(`Error saving Moment:`, error);
+    }
+    navigate(-1);
+  };
+
+  const handleDelete = async () => {
+    await deleteMoment(selectedMomentId!);
+    navigate(-1);
+  };
 
   return (
-    <div className="mt-2" id="moment-form-page">
-      <MomentForm
-        momentId={momentId}
-        familyId={currentFamilyId}
-        onFamilyChange={handleFamilyChange}
-        initialData={moment}
-        onDelete={handleDelete}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-      />
+    <div className="w-full flex flex-col items-center">
+      <div
+        className="w-full flex flex-col md:flex-row gap-4 items-start justify-center pt-4"
+        data-testid={"moment-form-container"}
+      >
+        <EntityForm<InitialMomentFormValues>
+          form={form}
+          entityType="Moment"
+          entityId={selectedMomentId}
+          onSubmit={handleSubmit}
+          onDelete={handleDelete}
+        >
+          <EntityFormField
+            control={form.control}
+            name="body"
+            label="Body"
+            testId="body-input"
+          >
+            {(field) => <Input {...field} />}
+          </EntityFormField>
+        </EntityForm>
+        {selectedMomentId && (
+          <ConnectedMoments entityId={selectedMomentId} entityType="moment" />
+        )}
+      </div>
     </div>
   );
 };

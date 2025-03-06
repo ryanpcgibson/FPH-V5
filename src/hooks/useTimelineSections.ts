@@ -9,7 +9,6 @@ import { useLocationTimelineContext } from "@/context/LocationTimelineContext";
 export const useTimelineSections = (petId?: number) => {
   const { petTimelines, getFilteredPetTimelines } = usePetTimelineContext();
   const { locationTimelines } = useLocationTimelineContext();
-
   return useMemo(() => {
     const sections: Record<string, TimelineSection> = {};
     const filteredPetTimelines = getFilteredPetTimelines(petId);

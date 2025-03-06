@@ -54,7 +54,7 @@ const EntityConnectionManager: React.FC<EntityConnectionManagerProps> = ({
       <div className="flex flex-col w-full">
         {connectedEntities.map((entity) => (
           <div
-            key={entity.id}
+            key={`${entityType}-${entity.id}`}
             className="flex items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background mb-2"
           >
             <span>{getEntityDisplayName(entity)}</span>

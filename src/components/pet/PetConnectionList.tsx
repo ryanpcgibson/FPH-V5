@@ -47,9 +47,6 @@ const PetConnectionList: React.FC<PetConnectionListProps> = ({
     moment.pets?.some((p) => p.id === petId)
   );
 
-  console.log("overlappingLocations", overlappingLocations);
-  console.log("overlappingPets", overlappingPets);
-
   // Combine moments and locations (excluding pet)
   const timelineItems: TimelineItem[] = [
     ...petMoments.map((moment) => ({

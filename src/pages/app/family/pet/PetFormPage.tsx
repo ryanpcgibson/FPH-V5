@@ -12,7 +12,7 @@ import { useURLContext } from "@/context/URLContext";
 import EntityForm from "@/components/EntityForm";
 import EntityFormField from "@/components/EntityFormField";
 import { Input } from "@/components/ui/input";
-import ConnectedMomentsCard from "@/components/ConnectedMoments";
+import ConnectedMoments from "@/components/ConnectedMoments";
 
 const formSchema = z.object({
   name: z.string().min(2, VALIDATION_MESSAGES.PET.NAME_MIN_LENGTH),
@@ -139,7 +139,7 @@ const PetFormPage = () => {
           </EntityFormField>
         </EntityForm>
         {selectedPetId && (
-          <ConnectedMomentsCard entityId={selectedPetId} entityType="pet" />
+          <ConnectedMoments entityId={selectedPetId} entityType="pet" />
         )}
       </div>
     </div>

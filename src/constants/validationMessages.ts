@@ -1,5 +1,4 @@
-// DELETE?
-
+// Centralized so both form validation and automated testing can use the same strings
 export const VALIDATION_MESSAGES = {
   PET: {
     NAME_MIN_LENGTH: "Pet name must be at least 2 characters",
@@ -11,5 +10,9 @@ export const VALIDATION_MESSAGES = {
     START_DATE_REQUIRED: "Start date is required",
     INVALID_DATE: "Please enter a valid date",
   },
-  // ... other entity messages
+  MOMENT: {
+    TITLE_MIN_LENGTH: "Title must be at least 2 characters",
+    START_DATE_REQUIRED: "Start date is required",
+    INVALID_DATE: "Please enter a valid date",
+  },
 } as const;

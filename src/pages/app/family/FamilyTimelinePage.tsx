@@ -16,7 +16,7 @@ const FamilyTimelinePage: React.FC = () => {
   const { sections, yearsArray } = useTimelineSections();
   const minWidth = (yearsArray.length + 1) * cellWidth + headerWidth;
 
-  const { error, isLoading } = useFamilyDataContext();
+  const { familyData, error, isLoading } = useFamilyDataContext();
 
   const scrollToYear = (year: number) => {
     if (gridInnerRef.current) {
@@ -73,6 +73,14 @@ const FamilyTimelinePage: React.FC = () => {
               />
             ))}
             <AddItemButton headerWidth={headerWidth} />
+            {/* This is a hidden div that contains all the moments. It is used in automated testing to check moments presence */}
+            <div style={{ display: "none" }}>
+              {familyData?.moments.map((moment) => (
+                <div key={moment.id} data-testid={`moment-hidden-${moment.id}`}>
+                  {moment.title}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
