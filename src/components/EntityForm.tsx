@@ -14,7 +14,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { Card, CardContent, CardFooter } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import { useState, ReactNode } from "react";
 import EntityFormField from "@/components/EntityFormField";
@@ -47,6 +53,11 @@ function EntityForm<T extends FieldValues>({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
         <Card>
+          <CardHeader className="flex items-center justify-center p-2 pt-4">
+            <CardTitle>
+              {entityId ? "Update" : "Add"} {entityType}
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             {form.getValues("title" as Path<T>) !== undefined ? (
               <EntityFormField

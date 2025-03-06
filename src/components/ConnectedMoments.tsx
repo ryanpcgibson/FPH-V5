@@ -57,7 +57,7 @@ const ConnectedMoments: React.FC<ConnectedMomentsCardProps> = ({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex items-center justify-center p-2 pt-4">
         <CardTitle>Connections</CardTitle>
       </CardHeader>
       <CardContent>
