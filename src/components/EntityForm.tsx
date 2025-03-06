@@ -45,9 +45,9 @@ function EntityForm<T extends FieldValues>({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-2xl">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
         <Card>
-          <CardContent className="p-3">
+          <CardContent>
             {form.getValues("title" as Path<T>) !== undefined ? (
               <EntityFormField
                 control={form.control}

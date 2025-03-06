@@ -29,7 +29,8 @@ const EntityFormField = <T extends FieldValues>({
       render={({ field, fieldState }) => (
         <FormItem className="grid grid-cols-[100px_1fr] gap-4 items-center">
           <FormLabel className="col-span-1 text-right">{label}</FormLabel>
-          <div className="col-span-1 w-full max-w-[300px]">
+          {/* max-w-[300px] */}
+          <div className="col-span-1 w-full ">
             <FormControl
               className="text-left bg-background"
               data-testid={testId}

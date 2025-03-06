@@ -77,7 +77,6 @@ const PetFormPage = () => {
       const foundPet = selectedPetId
         ? familyData.pets.find((p) => p.id === selectedPetId)
         : null;
-      console.log("foundPet:", selectedPetId, foundPet, familyData);
 
       form.reset({
         name: foundPet?.name || "",
@@ -117,10 +116,10 @@ const PetFormPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full h-full flex portrait:flex-col landscape:flex-row gap-2 overflow-auto items-center">
       <div
-        className="w-full flex flex-col md:flex-row gap-4 items-start justify-center pt-4"
-        data-testid={"pet-form-container"}
+        className="w-full landscape:w-1/2 landscape:h-full"
+        data-testid={"pet-entity-form-container"}
       >
         <EntityForm<InitialPetFormValues>
           form={form}
@@ -138,10 +137,15 @@ const PetFormPage = () => {
             {(field) => <Input {...field} />}
           </EntityFormField>
         </EntityForm>
-        {selectedPetId && (
-          <ConnectedMoments entityId={selectedPetId} entityType="pet" />
-        )}
       </div>
+      {selectedPetId && (
+        <div
+          className="w-full landscape:w-1/2 h-full"
+          id="pet-connection-form-container"
+        >
+          <ConnectedMoments entityId={selectedPetId} entityType="pet" />
+        </div>
+      )}
     </div>
   );
 };

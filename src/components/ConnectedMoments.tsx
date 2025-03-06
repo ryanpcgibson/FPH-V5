@@ -56,11 +56,9 @@ const ConnectedMoments: React.FC<ConnectedMomentsCardProps> = ({
   }
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card>
       <CardHeader>
-        <CardTitle>
-          Connected {entityType === "moment" ? "Entities" : "Moments"}
-        </CardTitle>
+        <CardTitle>Connections</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-2">

@@ -118,10 +118,13 @@ const MomentFormPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div
+      className="w-full h-full flex portrait:flex-col landscape:flex-row gap-2  overflow-auto items-center"
+      data-testid={"moment-form-container"}
+    >
       <div
-        className="w-full flex flex-col md:flex-row gap-4 items-start justify-center pt-4"
-        data-testid={"moment-form-container"}
+        className="w-full landscape:w-1/2 landscape:h-full"
+        id="moment-entity-form-container"
       >
         <EntityForm<InitialMomentFormValues>
           form={form}
@@ -139,10 +142,15 @@ const MomentFormPage = () => {
             {(field) => <Input {...field} />}
           </EntityFormField>
         </EntityForm>
-        {selectedMomentId && (
-          <ConnectedMoments entityId={selectedMomentId} entityType="moment" />
-        )}
       </div>
+      {selectedMomentId && (
+        <div
+          className="w-full landscape:w-1/2 h-full"
+          id="moment-connection-form-container"
+        >
+          <ConnectedMoments entityId={selectedMomentId} entityType="moment" />
+        </div>
+      )}
     </div>
   );
 };

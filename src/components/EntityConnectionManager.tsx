@@ -51,11 +51,11 @@ const EntityConnectionManager: React.FC<EntityConnectionManagerProps> = ({
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full gap-2">
         {connectedEntities.map((entity) => (
           <div
             key={`${entityType}-${entity.id}`}
-            className="flex items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background mb-2"
+            className="flex items-center justify-between rounded-md border border-input bg-background p-2 text-sm ring-offset-background h-10"
           >
             <span>{getEntityDisplayName(entity)}</span>
             <Button
@@ -63,7 +63,7 @@ const EntityConnectionManager: React.FC<EntityConnectionManagerProps> = ({
               size="sm"
               onClick={() => onDisconnect(entity.id)}
             >
-              <Link2Off className="h-4 w-4 text-red-500" />
+              <Link2Off className=" text-red-500" />
             </Button>
           </div>
         ))}
@@ -75,7 +75,7 @@ const EntityConnectionManager: React.FC<EntityConnectionManagerProps> = ({
         }}
       >
         <SelectTrigger
-          className="w-full bg-background"
+          className="w-full h-10 px-2 text-sm bg-background"
           data-testid={`${entityType.toLowerCase()}-select-trigger`}
         >
           <SelectValue placeholder={`Connect ${entityType}...`} />

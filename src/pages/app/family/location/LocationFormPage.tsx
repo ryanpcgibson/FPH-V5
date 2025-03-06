@@ -111,10 +111,13 @@ function LocationFormPage() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div
+      className="w-full h-full flex portrait:flex-col landscape:flex-row gap-2 overflow-auto items-center"
+      data-testid={"location-form-container"}
+    >
       <div
-        className="w-full flex flex-col md:flex-row gap-4 items-start justify-center pt-4"
-        data-testid={"location-form-container"}
+        className="w-full landscape:w-1/2 landscape:h-full"
+        data-testid={"location-entity-form-container"}
       >
         <EntityForm<InitialLocationFormValues>
           form={form}
@@ -132,14 +135,19 @@ function LocationFormPage() {
             {(field) => <Input {...field} />}
           </EntityFormField>
         </EntityForm>
+        </div>
         {selectedLocationId && (
-          <ConnectedMoments
-            entityId={selectedLocationId}
-            entityType="location"
-          />
+          <div
+            className="w-full landscape:w-1/2 h-full"
+            id="location-connection-form-container"
+          >
+            <ConnectedMoments
+              entityId={selectedLocationId}
+              entityType="location"
+            />
+          </div>
         )}
       </div>
-    </div>
   );
 }
 
