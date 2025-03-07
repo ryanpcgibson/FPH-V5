@@ -45,7 +45,7 @@ export function useMoments() {
         .delete()
         .eq("moment_id", momentId)
         .eq(`${entityType}_id`, entityId);
-        
+
       console.log('Executing query:', query);
       
       const { error } = await query;

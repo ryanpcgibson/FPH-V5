@@ -15,7 +15,8 @@ const ConnectedMoments: React.FC<ConnectedMomentsCardProps> = ({
   entityId,
   entityType,
 }) => {
-  const { selectedMomentId } = useURLContext();
+  const { selectedMomentId, selectedPetId, selectedLocationId } =
+    useURLContext();
   const { familyData } = useFamilyDataContext();
   const { connectMoment, disconnectMoment } = useMoments();
 
@@ -96,11 +97,19 @@ const ConnectedMoments: React.FC<ConnectedMomentsCardProps> = ({
               entityType={entityType}
               connectedEntities={connectedEntities}
               availableEntities={availableEntities}
-              onConnect={(entityId) =>
-                connectMoment(selectedMomentId!, entityId, entityType)
-              }
+              onConnect={(entityId) => {
+                connectMoment(
+                  entityId,
+                  entityType === "pet" ? selectedPetId! : selectedLocationId!,
+                  entityType
+                );
+              }}
               onDisconnect={(entityId) =>
-                disconnectMoment(selectedMomentId!, entityId, entityType)
+                disconnectMoment(
+                  entityId,
+                  entityType === "pet" ? selectedPetId! : selectedLocationId!,
+                  entityType
+                )
               }
             />
           )}
