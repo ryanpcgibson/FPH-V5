@@ -6,6 +6,31 @@ import type { TimelineSection } from "@/types/timeline";
 import { usePetTimelineContext } from "@/context/PetTimelineContext";
 import { useLocationTimelineContext } from "@/context/LocationTimelineContext";
 
+// Utility function to determine the sort year for both pets and locations
+const getSortYear = (segments, isLocation = false) => {
+  if (isLocation) {
+    const moveOutSegment = segments.find(
+      (segment) => segment.status === "move-out"
+    );
+    const moveInSegment = segments.find(
+      (segment) => segment.status === "move-in"
+    );
+    const finalYear = moveOutSegment
+      ? moveOutSegment.year
+      : new Date().getFullYear();
+    const initialYear = moveInSegment ? moveInSegment.year : 0;
+    return { finalYear, initialYear };
+  } else {
+    const deathSegment = segments.find((segment) => segment.status === "death");
+    const birthSegment = segments.find((segment) => segment.status === "birth");
+    const finalYear = deathSegment
+      ? deathSegment.year
+      : new Date().getFullYear();
+    const initialYear = birthSegment ? birthSegment.year : 0;
+    return { finalYear, initialYear };
+  }
+};
+
 export const useTimelineSections = (petId?: number) => {
   const { petTimelines, getFilteredPetTimelines } = usePetTimelineContext();
   const { locationTimelines } = useLocationTimelineContext();
@@ -18,10 +43,23 @@ export const useTimelineSections = (petId?: number) => {
     );
     // TODO: filter locations for pet
 
-    if (filteredPetTimelines.length > 0) {
+    // Sort pets using the utility function
+    const sortedPetTimelines = filteredPetTimelines.sort((a, b) => {
+      const aSortYear = getSortYear(a.segments);
+      const bSortYear = getSortYear(b.segments);
+      console.log(
+        `Sorting Pets: ${a.petName} (${aSortYear.finalYear}, ${aSortYear.initialYear}) vs ${b.petName} (${bSortYear.finalYear}, ${bSortYear.initialYear})`
+      );
+      if (bSortYear.finalYear !== aSortYear.finalYear) {
+        return bSortYear.finalYear - aSortYear.finalYear; // Sort by final year descending
+      }
+      return aSortYear.initialYear - bSortYear.initialYear; // Sort by initial year ascending
+    });
+
+    if (sortedPetTimelines.length > 0) {
       sections.pets = {
         id: "pet",
-        items: filteredPetTimelines.map((pet) => ({
+        items: sortedPetTimelines.map((pet) => ({
           id: pet.petId,
           name: pet.petName,
           segments: pet.segments,
@@ -33,10 +71,23 @@ export const useTimelineSections = (petId?: number) => {
       };
     }
 
-    if (locationTimelines.length > 0) {
+    // Sort locations using the same utility function with isLocation flag
+    const sortedLocationTimelines = locationTimelines.sort((a, b) => {
+      const aSortYear = getSortYear(a.segments, true);
+      const bSortYear = getSortYear(b.segments, true);
+      console.log(
+        `Sorting Locations: ${a.locationName} (${aSortYear.finalYear}, ${aSortYear.initialYear}) vs ${b.locationName} (${bSortYear.finalYear}, ${bSortYear.initialYear})`
+      );
+      if (bSortYear.finalYear !== aSortYear.finalYear) {
+        return bSortYear.finalYear - aSortYear.finalYear; // Sort by final year descending
+      }
+      return aSortYear.initialYear - bSortYear.initialYear; // Sort by initial year ascending
+    });
+
+    if (sortedLocationTimelines.length > 0) {
       sections.locations = {
         id: "location",
-        items: locationTimelines.map((location) => ({
+        items: sortedLocationTimelines.map((location) => ({
           id: location.locationId,
           name: location.locationName,
           segments: location.segments,
